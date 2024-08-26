@@ -57,7 +57,10 @@ def get_content_from_url(url):
     try:
         if docs:
             content = docs[0].page_content
-            title =  docs[0].metadata['title'] if docs[0].metadata['title'] else 'タイトル不明'
+            try:
+                title = docs[0].metadata['title']
+            except (KeyError, pytube_exceptions.PytubeError):
+                title = 'タイトル不明'
 
             return f'Title: {title}\n\n{content}'
         else:
@@ -70,6 +73,7 @@ def get_content_from_url(url):
     except Exception as e:
         # その他の予期しないエラーをキャッチ
         print(f'Unexpected error: {str(e)}')
+        return 'エラーが発生しました'
 
 
 url = st.text_input('URL:')
