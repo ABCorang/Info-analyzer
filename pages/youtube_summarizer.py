@@ -58,6 +58,7 @@ def get_content_from_url(url):
         try:
             title = yt.title
         except pytube_exceptions.PytubeError:
+            print(f'PytubeError: {str(e)}')
             title = 'タイトル不明'
         
         # YoutubeLoaderを使用してコンテンツを取得
@@ -76,7 +77,7 @@ def get_content_from_url(url):
             return 'コンテンツなし'
     
     except pytube_exceptions.PytubeError as e:
-        print(f"PytubeError: {str(e)}")
+        print(f'PytubeError: {str(e)}')
         return '動画の内容を取得できませんでした'
     except Exception as e:
         print(f'Unexpected error: {str(e)}')
