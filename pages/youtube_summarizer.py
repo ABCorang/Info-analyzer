@@ -48,30 +48,35 @@ model = GoogleGenerativeAI(model='gemini-1.5-flash-latest',
 
 
 def get_content_from_url(url):
-    loader = YoutubeLoader.from_youtube_url(youtube_url=url,
-                                   add_video_info=True,
-                                   language=['en', 'ja'])
-    
-    # list of `Document` (page_content, metadata)
-    docs = loader.load() 
     try:
+        # まず、YouTubeオブジェクトを作成
+        yt = YouTube(url)
+        
+        # タイトルを取得（エラーハンドリング付き）
+        try:
+            title = yt.title
+        except pytube_exceptions.PytubeError:
+            title = 'タイトル不明'
+        
+        # YoutubeLoaderを使用してコンテンツを取得
+        loader = YoutubeLoader.from_youtube_url(
+            youtube_url=url,
+            add_video_info=False,  # ビデオ情報の追加を無効化
+            language=['en', 'ja']
+        )
+        
+        docs = loader.load()
+        
         if docs:
             content = docs[0].page_content
-            try:
-                title = docs[0].metadata['title']
-            except (KeyError, pytube_exceptions.PytubeError):
-                title = 'タイトル不明'
-
             return f'Title: {title}\n\n{content}'
         else:
-            return f'なし'
+            return 'コンテンツなし'
     
     except pytube_exceptions.PytubeError as e:
-        # エラーをログに記録
         print(f"PytubeError: {str(e)}")
         return '動画の内容を取得できませんでした'
     except Exception as e:
-        # その他の予期しないエラーをキャッチ
         print(f'Unexpected error: {str(e)}')
         return 'エラーが発生しました'
 
