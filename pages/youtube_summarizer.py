@@ -2,7 +2,7 @@ from langchain_core.prompts import ChatPromptTemplate
 from langchain_community.document_loaders import YoutubeLoader
 from langchain_core.output_parsers import StrOutputParser
 from langchain_google_genai import GoogleGenerativeAI, HarmCategory, HarmBlockThreshold
-from langchain.document_loaders import YoutubeLoader
+from langchain_community import YoutubeLoader
 from pytube import YouTube
 import pytube.exceptions as pytube_exceptions
 
@@ -40,7 +40,7 @@ text
 
 '''
 
-model = GoogleGenerativeAI(model='gemini-1.5-flash-latest',
+model = GoogleGenerativeAI(model='gemini-1.5-flash-exp-0827',
             safety_settings={
                 HarmCategory.HARM_CATEGORY_DANGEROUS_CONTENT: HarmBlockThreshold.BLOCK_NONE,
                 HarmCategory.HARM_CATEGORY_HARASSMENT: HarmBlockThreshold.BLOCK_NONE,
@@ -52,7 +52,7 @@ model = GoogleGenerativeAI(model='gemini-1.5-flash-latest',
 def get_content_from_url(url):
     try:
         # まず、YouTubeオブジェクトを作成
-        yt = YouTube(url)
+        yt = YouTube(url, timeout=30)
         
         # タイトルを取得（エラーハンドリング付き）
         try:
