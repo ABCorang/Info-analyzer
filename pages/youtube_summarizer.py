@@ -51,7 +51,7 @@ model = GoogleGenerativeAI(model='gemini-1.5-flash-exp-0827',
 def get_content_from_url(url):
     try:
         # まず、YouTubeオブジェクトを作成
-        yt = YouTube(url, timeout=30)
+        yt = YouTube(url)
         
         # タイトルを取得（エラーハンドリング付き）
         try:
@@ -64,8 +64,7 @@ def get_content_from_url(url):
         loader = YoutubeLoader.from_youtube_url(
             youtube_url=url,
             add_video_info=False,  # ビデオ情報の追加を無効化
-            language=['en', 'ja']
-        )
+            language=['en', 'ja'])
         
         docs = loader.load()
         
