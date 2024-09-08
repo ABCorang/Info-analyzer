@@ -1,26 +1,47 @@
 from langchain_core.prompts import ChatPromptTemplate
 from langchain_core.output_parsers import StrOutputParser
 from langchain_google_genai import GoogleGenerativeAI, HarmCategory, HarmBlockThreshold
-from langchain_community.document_loaders import YoutubeLoader
-from pytube import YouTube
-import pytube.exceptions as pytube_exceptions
 from youtube_processing.youtube_info import get_transcript_from_video_id, convert_format, retrive_text_from_list
-
 import streamlit as st
-import traceback
-import requests
+import typing
 
 st.title('動画要約')
+selected_type = st.radio('モードを選択', ['normal', 'explain', 'detail']) 
 selected_lang = st.radio('言語を選択', ['ja', 'en']) # 選択肢を修正
 
-summarize_prompt = '''
-800字程度で以下の動画内容を要約してください
+def set_prompt(type: str = 'normal') -> ChatPromptTemplate:
+    if type == 'normal':
+        instruction_text = \
+        '''
+        1600字程度で以下の動画内容を日本語で要約してください
+        ------------------------------------------------
+        {content}
+        ------------------------------------------------
+        '''
+    elif type == 'explain':
+        instruction_text = \
+        '''
+        3000字程度で以下の動画内容を日本語で詳説してください
+        ------------------------------------------------
+        {content}
+        ------------------------------------------------
+        '''
+    else:
+        instruction_text = \
+        '''
+        8000字程度で以下の動画内容を日本語で詳説してください
+        ------------------------------------------------
+        {content}
+        ------------------------------------------------
+        '''
 
-------------------------------------------------
-{content}
-------------------------------------------------
+    
+    prompt = ChatPromptTemplate.from_messages(
+        ('human', instruction_text)
+    )
 
-'''
+    return prompt
+
 
 
 
@@ -37,9 +58,8 @@ id = st.text_input('youtube video id:')
 if id:
     st.spinner('Loading...')
     transcripts_list = get_transcript_from_video_id(id, selected_lang)
-    prompt = ChatPromptTemplate.from_messages(
-        ('human', summarize_prompt)
-    )
+
+    prompt = set_prompt(selected_type)
 
 
     content = retrive_text_from_list(transcripts_list)
@@ -49,7 +69,8 @@ if id:
 
 
     st.write_stream(chain.stream({'content': content}))
-    st.markdown("## Original Text")
-    st.write_stream(transcripts)
+    if selected_type == 'normal':
+        st.markdown("## Original Text")
+        st.write_stream(transcripts)
 
     
