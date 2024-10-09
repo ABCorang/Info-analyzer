@@ -13,6 +13,11 @@ with st.sidebar:
         ['^SPX', 'TECL', '^DJI', '^IXIC']
     )
 
+    cnn_link = 'https://edition.cnn.com/markets/fear-and-greed'
+    st.markdown(f'links <br>[fear and greed]({cnn_link})', unsafe_allow_html=True)
+
+
+
 start_date = st.date_input(
     "When\'s sart date",
     datetime.datetime.now() - datetime.timedelta(days=365)
@@ -24,6 +29,28 @@ def get_data(ticker, start_d=None):
     # df = pdr.DataReader(ticker, data_source='stooq', start=start_d).sort_index()
     df = yf.download(tickers=ticker, start=start_date)
     return df
+
+def calculate_year_to_date_return(df):
+    """
+    年初来の騰落率を計算する関数
+
+    Args:
+        df (pd.DataFrame): 株価データのDataFrame
+
+    Returns:
+        float: 年初来の騰落率
+    """
+    # 現在の年を取得
+    current_year = df.index[-1].year
+    # 現在の年の最初の有効なインデックスを取得
+    first_valid_index_of_current_year = df[f'{current_year}':].first_valid_index()
+    # 現在の年の最初のデータを取得
+    first_data_of_current_year = df.loc[first_valid_index_of_current_year]
+    # 年初来の騰落率を計算
+    year_to_date_return = ((df.iloc[-1] - first_data_of_current_year) / first_data_of_current_year)['Adj Close'] * 100
+
+    return year_to_date_return
+
 
 input_ticker = st.text_input('please input ticker:')
 
@@ -53,15 +80,22 @@ if raw_ticker:
         "plot_bgcolor":"light blue"
     }
 
-
     fig = go.Figure(layout=layout, data=data)
     # 不要な日付を非表示にする
     fig.update_xaxes(rangebreaks=[dict(values=clsoed_days_list)])
+
+
     # ボタンを押した場合別画面チャートを開く
     if st.button('open another chart'):
         fig.show()
-    # 同ページ内でチャートを描画
+
+    #年初来上昇率表示
+    year_to_date_return = calculate_year_to_date_return(ticker_df)
+    st.markdown(f'### 年初来{year_to_date_return:.2f}%')
+
+    # 同ページ内でplotlyチャートを描画
     st.plotly_chart(fig)
+
     # 対象tickerの価格データ（新しい順）に表示
     sorted_ticker_df = ticker_df.sort_values(by='Date', ascending=False)
     st.write(sorted_ticker_df)

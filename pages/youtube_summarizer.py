@@ -45,7 +45,7 @@ def set_prompt(type: str = 'normal') -> ChatPromptTemplate:
 
 
 
-model = GoogleGenerativeAI(model='gemini-1.5-flash-exp-0827',
+model = GoogleGenerativeAI(model='gemini-1.5-flash-002',
             safety_settings={
                 HarmCategory.HARM_CATEGORY_DANGEROUS_CONTENT: HarmBlockThreshold.BLOCK_NONE,
                 HarmCategory.HARM_CATEGORY_HARASSMENT: HarmBlockThreshold.BLOCK_NONE,
