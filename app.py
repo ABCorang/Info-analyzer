@@ -6,14 +6,15 @@ import streamlit as st
 import yfinance as yf
 
 
-default_start_date = datetime.datetime.now() - datetime.timedelta(days=365)
+default_start_date = datetime.datetime.now() - datetime.timedelta(days=730)
 
 def get_data(ticker, start_date=None):
 
     if start_date is None:
-        df = yf.download(tickers=ticker)
+        df = yf.Ticker(ticker)
     else:
-        df = yf.download(tickers=ticker, start=start_date)
+        df = yf.Ticker(ticker)
+        df = df.history(start=start_date)
     return df
 
 def calculate_year_to_date_return(df):
@@ -33,7 +34,7 @@ def calculate_year_to_date_return(df):
     # 現在の年の最初のデータを取得
     first_data_of_current_year = df.loc[first_valid_index_of_current_year]
     # 年初来の騰落率を計算
-    year_to_date_return = ((df.iloc[-1] - first_data_of_current_year) / first_data_of_current_year)['Adj Close'] * 100
+    year_to_date_return = ((df.iloc[-1] - first_data_of_current_year) / first_data_of_current_year)['Close'] * 100
 
     return year_to_date_return
 
@@ -94,7 +95,7 @@ def main():
         
         # 対象期間からdf上にない(=休業日)日付を取り出したリスト
         clsoed_days_list = [d for d in target_days if not d in ticker_df.index]
-
+        # 空のFigureオブジェクトを作成
         data = [
             go.Candlestick(yaxis="y1", x=ticker_df.index, open=ticker_df["Open"], high=ticker_df["High"], low=ticker_df["Low"], close=ticker_df["Close"]),
             go.Bar(yaxis="y3", x=ticker_df.index, y=ticker_df["Volume"], name= "Volume", marker={ "color": "slategray" } ) 
@@ -110,6 +111,7 @@ def main():
         }
 
         fig = go.Figure(layout=layout, data=data)
+
         # 不要な日付を非表示にする
         fig.update_xaxes(rangebreaks=[dict(values=clsoed_days_list)])
 
@@ -132,7 +134,7 @@ def main():
         st.markdown('---')
         # ドル円データを取得(円換算用
         usdjpy = yf.download("JPY=X", start=input_start_date)
-        combined_df = pd.concat([ticker_df['Adj Close'], usdjpy['Adj Close']], axis=1)
+        combined_df = pd.concat([ticker_df['Close'], usdjpy['Close']], axis=1)
         combined_df.columns = [f'{ticker}', 'usdjpy']
         combined_df = combined_df.dropna()
         combined_df[f'{ticker}_jpy'] = combined_df[f'{ticker}'] * combined_df['usdjpy']

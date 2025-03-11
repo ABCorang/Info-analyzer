@@ -21,7 +21,8 @@ def set_prompt(type: str = 'normal') -> ChatPromptTemplate:
     elif type == 'explain':
         instruction_text = \
         '''
-        3000字程度で以下の動画内容を日本語で詳説してください
+        8000字程度で以下の動画内容を日本語で詳説してください
+        
         ------------------------------------------------
         {content}
         ------------------------------------------------
@@ -29,7 +30,7 @@ def set_prompt(type: str = 'normal') -> ChatPromptTemplate:
     else:
         instruction_text = \
         '''
-        8000字程度で以下の動画内容を日本語で詳説してください
+        16000字程度で以下の動画内容を日本語で詳説してください
         ------------------------------------------------
         {content}
         ------------------------------------------------
@@ -45,7 +46,7 @@ def set_prompt(type: str = 'normal') -> ChatPromptTemplate:
 
 
 
-model = GoogleGenerativeAI(model='gemini-1.5-flash-002',
+model = GoogleGenerativeAI(model='gemini-2.0-flash',
             safety_settings={
                 HarmCategory.HARM_CATEGORY_DANGEROUS_CONTENT: HarmBlockThreshold.BLOCK_NONE,
                 HarmCategory.HARM_CATEGORY_HARASSMENT: HarmBlockThreshold.BLOCK_NONE,
